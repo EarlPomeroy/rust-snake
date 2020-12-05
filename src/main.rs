@@ -16,6 +16,7 @@ const BACKGROUND_COLOR: Color = [0.5, 0.5, 0.5, 1.0];
 fn main() {
     let (width, height) = (30, 30);
 
+    // Create window with title and set it to close on Esc
     let mut window: PistonWindow = WindowSettings::new(
         "Rusty the Snake!",
         (make_coords_f64(width), make_coords_f64(height)),
@@ -24,8 +25,10 @@ fn main() {
     .build()
     .unwrap_or_else(|e| panic!("Failed to build PistonWindow: {}", e));
 
+    // Create game object
     let mut game = Game::new(width, height);
 
+    // Draw the board and handle keyboard input
     while let Some(e) = window.next() {
         window.draw_2d(&e, |c, g, _d| {
             clear(BACKGROUND_COLOR, g);
