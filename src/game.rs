@@ -11,6 +11,8 @@ use rand::{thread_rng, Rng};
 // In milliseconds
 const MOVE_RATE: u128 = 200;
 const GAME_OVER_RATE: u128 = 2000;
+
+// Starting length of 3 blocks
 const SNAKE_LEN: i32 = 3;
 
 const BORDER_COLOR: Color = [0.2, 0.2, 0.2, 1.0];
@@ -29,6 +31,7 @@ pub struct Game {
 }
 
 impl Game {
+    /// New game
     pub fn new(width: i32, height: i32) -> Self {
         Self {
             snake: Snake::new(SNAKE_LEN, width, height),
@@ -42,6 +45,7 @@ impl Game {
         }
     }
 
+    /// See if snake hit border or own body
     fn detect_collision(&mut self) -> bool {
         let next_head = self.snake.get_next_head();
 
@@ -64,11 +68,16 @@ impl Game {
         return false;
     }
 
+    /// See if the snake ate the food
     fn ate_food(&self) -> bool {
         let next_head = self.snake.get_next_head();
         next_head.x == self.food_x && next_head.y == self.food_y
     }
 
+    /// Update the UI and manage game state
+    /// Detect collisions to end game
+    /// Determine if Head and Apple match
+    /// Draw borders, game over, snake, and food
     pub fn draw(&mut self, con: Context, g: &mut G2d) {
         if Game::get_time() > self.next_move {
             if self.game_over {
@@ -88,13 +97,14 @@ impl Game {
             }
 
             self.next_move = Game::get_new_time(MOVE_RATE);
-            
+
             if !self.detect_collision() {
                 self.snake.move_snake();
             }
         }
 
         if self.game_over {
+            // games over, draw red screen tinting
             draw_rectangle(GAME_OVER_COLOR, 0, 0, self.width, self.height, con, g);
         }
 
@@ -107,14 +117,17 @@ impl Game {
         self.snake.draw(con, g);
     }
 
+    /// Draw food at current food x and y
     fn draw_food(&self, con: Context, g: &mut G2d) {
         draw_block(FOOD_COLOR, self.food_x, self.food_y, con, g)
     }
 
+    /// Current time Plus some rate
     fn get_new_time(rate: u128) -> u128 {
         Game::get_time() + rate
     }
 
+    /// Get current time
     fn get_time() -> u128 {
         SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -122,6 +135,7 @@ impl Game {
             .as_millis()
     }
 
+    /// Detect key press and convert them to directions
     pub fn key_pressed(&mut self, key: Key) {
         match key {
             Key::Up => self.snake.new_direction(Direction::UP),
@@ -132,6 +146,7 @@ impl Game {
         };
     }
 
+    /// Create a new tuple representing the X and Y of new food location
     fn make_food(&self) -> (i32, i32) {
         let mut rng = thread_rng();
         let mut x = rng.gen_range(1, self.width - 1);
@@ -145,6 +160,7 @@ impl Game {
         (x, y)
     }
 
+    /// Reset the game
     fn restart(&mut self) {
         self.snake = Snake::new(SNAKE_LEN, self.width, self.height);
         self.has_food = false;
